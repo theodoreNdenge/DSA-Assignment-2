@@ -3,11 +3,24 @@ import ballerina/io;
 //import ballerina/time;
 import ballerinax/kafka;
 
+const string KAFKA_BROKER_URL = "localhost:9092";
+
+// Define a Request type to hold information about a delivery request
+type Shipment record {
+    string shipmentType; // Type of shipment (standard, express, international)
+    string pickupLocation; // Pickup location for the package
+    string deliveryLocation; // Delivery location for the package
+    string preferredTime; // Preferred pickup or delivery time
+    string customerFirstName; // Customer's first name
+    string customerLastName; // Customer's last name
+    string customerContact; // Customer's contact number
+};
+
 // Kafka Producer to send the response back to the central_logistics
-kafka:Producer responseInternationalProducer = check new (KAFKA_BROKER_URL);
+kafka:Producer internationalProducer = check new (KAFKA_BROKER_URL);
 
 // Kafka Listener to listen for requests on the "international_delivery_requests" topic
-listener kafka:Listener con = new (KAFKA_BROKER_URL, {
+listener kafka:Listener cons = new (KAFKA_BROKER_URL, {
     groupId: "international-delivery-group",
     topics: "international_delivery_requests" // Kafka topic for international delivery requests
 });
@@ -30,7 +43,7 @@ service on cons {
             io:println("Updated Delivery Time: ", updatedDeliveryTime);
 
             // Send the updated request back to the central_logistics Kafka topic
-            check responseInternationalProducer->send({topic: "international_delivery_response", value: updatedReq});
+            check internationalProducer->send({topic: "international_delivery_response", value: updatedReq});
             io:println("Response sent back to central logistics: ", updatedReq);
         }
     }
