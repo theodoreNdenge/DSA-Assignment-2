@@ -1,0 +1,81 @@
+services:
+  # Logistics Service
+  logistics-service:
+    build:
+      context: ./logistics
+      dockerfile: Dockerfile
+    container_name: logistics-service
+    ports:
+      - "8080:8080"  # Expose logistics service on port 8080
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+      - MONGODB_URI=mongodb://mongodb:27017/logistics
+    depends_on:
+      - kafka
+      - mongodb
+    networks:
+      - logistics-network
+
+  # Standard Delivery Service
+  standard-delivery-service:
+    build:
+      context: ./standard_delivery
+      dockerfile: Dockerfile
+    container_name: standard-delivery-service
+    ports:
+      - "8081:8081"  # Expose standard delivery service on port 8081
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+  # Express Delivery Service
+  express-delivery-service:
+    build:
+      context: ./express_delivery
+      dockerfile: Dockerfile
+    container_name: express-delivery-service
+    ports:
+      - "8082:8082"  # Expose express delivery service on port 8082
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+  # International Delivery Service
+  international-delivery-service:
+    build:
+      context: ./international_delivery
+      dockerfile: Dockerfile
+    container_name: international-delivery-service
+    ports:
+      - "8083:8083"  # Expose international delivery service on port 8083
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+  # Producer Service
+  producer-service:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer-service
+    ports:
+      - "8084:8084"  # Expose producer service on port 8084
+    environment:
+      - KAFKA_BROKER_URL=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+networks:
+  logistics-network:
+    external: true  # Ensure this network is shared with docker-compose-infra.yml
